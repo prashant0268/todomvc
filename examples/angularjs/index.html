@@ -15,7 +15,9 @@
 				<header id="header">
 					<h1>todos</h1>
 					<form id="todo-form" ng-submit="addTodo()">
-						<input id="new-todo" placeholder="What needs to be done?" ng-model="newTodo" ng-disabled="saving" autofocus>
+						<input id="new-todo" placeholder="What needs to be done?" ng-model="newTodo" ng-disabled="saving" autofocus>            
+            <input id="new-todo-when" placeholder="When?" ng-model="newTodoWhen" ng-disabled="saving">            
+            <button ng-click="addTodo()"></button>
 					</form>
 				</header>
 				<section id="main" ng-show="todos.length" ng-cloak>
@@ -26,6 +28,7 @@
 							<div class="view">
 								<input class="toggle" type="checkbox" ng-model="todo.completed" ng-change="toggleCompleted(todo)">
 								<label ng-dblclick="editTodo(todo)">{{todo.title}}</label>
+                <span ng-dblclick="editTodo(todo)" ng-show="todo.due">Due : {{todo.due | date : 'shortDate'}}</span>
 								<button class="destroy" ng-click="removeTodo(todo)"></button>
 							</div>
 							<form ng-submit="saveEdits(todo, 'submit')">

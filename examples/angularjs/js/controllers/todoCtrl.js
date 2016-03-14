@@ -1,3 +1,10 @@
+Date.prototype.addDays = function(days)
+{
+    var dat = new Date(this.valueOf());
+    dat.setDate(dat.getDate() + days);
+    return dat;
+}
+
 /*global angular */
 
 /**
@@ -12,6 +19,7 @@ angular.module('todomvc')
 		var todos = $scope.todos = store.todos;
 
 		$scope.newTodo = '';
+    $scope.newTodoWhen = '';
 		$scope.editedTodo = null;
 
 		$scope.$watch('todos', function () {
@@ -29,12 +37,14 @@ angular.module('todomvc')
 		});
 
 		$scope.addTodo = function () {
+      var today = new Date();
 			var newTodo = {
 				title: $scope.newTodo.trim(),
+        due : $scope.newTodoWhen === '' ? today : today.addDays($scope.newTodoWhen.slice(0, -1)), 
 				completed: false
 			};
 
-			if (!newTodo.title) {
+			if (!newTodo.title || isNaN($scope.newTodoWhen.slice(0, -1))) {
 				return;
 			}
 
@@ -42,6 +52,7 @@ angular.module('todomvc')
 			store.insert(newTodo)
 				.then(function success() {
 					$scope.newTodo = '';
+          $scope.newTodoWhen = '';
 				})
 				.finally(function () {
 					$scope.saving = false;
