@@ -1,8 +1,6 @@
 Date.prototype.addDays = function(days)
 {
-    var dat = new Date(this.valueOf());
-    dat.setDate(dat.getDate() + days);
-    return dat;
+    return new Date(this.valueOf()+24*60*60*1000*days);
 }
 
 /*global angular */
@@ -13,13 +11,21 @@ Date.prototype.addDays = function(days)
  * - exposes the model to the template and provides event handlers
  */
 angular.module('todomvc')
+.filter('inDays', function(){
+    return function(due) { 
+        var ret = moment(due).fromNow('day') === '1 day' ? 'today' : 
+            (moment(due).fromNow('day') === '2 days' ? 'tomorrow' : 'in ' + moment(due).fromNow('day'));
+        return ret ;
+    }
+})
 	.controller('TodoCtrl', function TodoCtrl($scope, $routeParams, $filter, store) {
 		'use strict';
 
 		var todos = $scope.todos = store.todos;
+        todos = angular.extend(todos)
 
 		$scope.newTodo = '';
-    $scope.newTodoWhen = '';
+        $scope.newDueInDays = '';
 		$scope.editedTodo = null;
 
 		$scope.$watch('todos', function () {
@@ -37,14 +43,14 @@ angular.module('todomvc')
 		});
 
 		$scope.addTodo = function () {
-      var today = new Date();
+            var today = new Date();
 			var newTodo = {
 				title: $scope.newTodo.trim(),
-        due : $scope.newTodoWhen === '' ? today : today.addDays($scope.newTodoWhen.slice(0, -1)), 
+                due : $scope.newDueInDays === '' ? moment(today).endOf('day').toDate() : moment(today.addDays($scope.newDueInDays.slice(0, -1))).endOf('day').toDate(), 
 				completed: false
 			};
 
-			if (!newTodo.title || isNaN($scope.newTodoWhen.slice(0, -1))) {
+			if (!newTodo.title || isNaN($scope.newDueInDays.slice(0, -1))) {
 				return;
 			}
 
@@ -52,7 +58,7 @@ angular.module('todomvc')
 			store.insert(newTodo)
 				.then(function success() {
 					$scope.newTodo = '';
-          $scope.newTodoWhen = '';
+          $scope.newDueInDays = '';
 				})
 				.finally(function () {
 					$scope.saving = false;
